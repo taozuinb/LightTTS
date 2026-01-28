@@ -18,3 +18,9 @@ voices:
   - name: male2
     audio_path: assets/xiangyu1.mp3
     prompt_text: "北京是有名额的，我们现在是不收加盟费了，我们是采用抽点的方式和加盟商一同运营成长的。"
+  - name: female_lzc
+    audio_path: assets/female_lzc.wav
+    prompt_text: "您放心，住宿呢，我们选择的是校企合作的快捷酒店，2到3人一间，有专人的24小时值班。"
+  - name: male_llc
+    audio_path: assets/male_llc.wav
+    prompt_text: "住宿是当地准四星级酒店，都在景区周边，走路或者坐车都能到景点，不用跑很远，很方便的。"
