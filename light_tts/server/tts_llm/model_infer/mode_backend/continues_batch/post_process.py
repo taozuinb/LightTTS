@@ -2,8 +2,10 @@ import torch
 from typing import List
 from light_tts.common.basemodel.triton_kernel.apply_penalty import apply_penalty
 from dataclasses import dataclass
-from ...infer_batch import InferReq, g_infer_context
 
+from light_tts.utils.log_utils import init_logger
+from ...infer_batch import InferReq, g_infer_context
+logger = init_logger(__name__)
 
 def nucleus_sampling(weighted_scores, top_p=0.8, top_k=25, not_first=False):
     sorted_probs, sorted_idx = weighted_scores.softmax(dim=-1).sort(descending=True, stable=True, dim=-1)
@@ -39,22 +41,28 @@ def sample(
     weighted_scores: torch.Tensor,
     decoded_tokens: torch.Tensor,
     ignore_eos: torch.Tensor,
-    bistream: torch.Tensor,
+    # bistream: torch.Tensor,
     eos_id: int = 6561,
-    fill_token_id: int = 6563,
+    # fill_token_id: int = 6563,
 ):
     num_trials, max_trials = 0, 100
     
     top_ids = ras_sampling(weighted_scores, decoded_tokens)
-    mask = (top_ids > eos_id) | ((top_ids == eos_id) & ignore_eos)
+    # mask = (top_ids > eos_id) | ((top_ids == eos_id) & ignore_eos)
+    mask = ignore_eos & (top_ids >= eos_id)
     while mask.any():
         top_ids[mask] = ras_sampling(weighted_scores[mask], decoded_tokens[mask], not_first=True)
         # top_ids 为大于speech_token_size的值，而且不是fill_token，或者是fill_token，但不是(bistream且在text没receiving完的情况)
-        mask = ((top_ids > eos_id) & (top_ids != fill_token_id | ~bistream | ~ignore_eos)) | ((top_ids == eos_id) & ignore_eos)
+        # mask = ((top_ids > eos_id) & (top_ids != fill_token_id | ~bistream | ~ignore_eos)) | ((top_ids == eos_id) & ignore_eos)
+        mask = ignore_eos & (top_ids >= eos_id)
 
         num_trials += 1
         # TODO: 错误处理
         if num_trials > max_trials:
-            raise RuntimeError('sampling reaches max_trials {} and still get eos when ignore_eos is True, check your input {}!'.format(max_trials, mask))
+            # raise RuntimeError('sampling reaches max_trials {} and still get eos when ignore_eos is True, check your input {}!'.format(max_trials, mask))
+            logger.error(
+                'sampling reaches max_trials {} and still get eos when ignore_eos is True, check your input {}!'.format(
+                    max_trials, mask))
+            top_ids[mask] = eos_id  # 错误处理，返回eos_id
 
     return top_ids

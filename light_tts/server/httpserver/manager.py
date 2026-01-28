@@ -270,9 +270,9 @@ class HttpServerManager:
 
             # 清理已经处理完的可以删除的请求
             release_req_status: List[ReqStatus] = []
-            for req_status in self.req_id_to_out_inf.values():
-                if req_status.can_release():
-
+            for group_req_id_ in list(self.req_id_to_out_inf.keys()):
+                req_status: ReqStatus = self.req_id_to_out_inf.get(group_req_id_, None)
+                if req_status is not None and req_status.can_release():
                     release_req_status.append(req_status)
             
             for req_status in release_req_status:
@@ -301,20 +301,27 @@ class HttpServerManager:
             except asyncio.TimeoutError:
                 pass
 
-            for req_status in self.req_id_to_out_inf.values():
+            for group_req_id_ in list(self.req_id_to_out_inf.keys()):
+                req_status = self.req_id_to_out_inf.get(group_req_id_, None)
+                if req_status is None:
+                    continue
+
                 for req in req_status.group_req_objs.shm_req_objs:
                     if req.stream:
                         if not req.out_tokens_queue.is_empty():
                             tts_speech, token_offset, finalize = req.out_tokens_queue.peek()
-                            req.out_tokens_queue.pop_no_ret()
+                            # req.out_tokens_queue.pop_no_ret()
+                            tts_speech = tts_speech.copy()
                         
                             if finalize:
                                 finish_status = FinishStatus(req.finish_status.status)
                             else:
                                 finish_status = FinishStatus()
+                            req.out_tokens_queue.pop_no_ret()
                             async with req_status.lock:
                                 logger.debug(f"req_id {req.request_id} shm_index {req.index_in_shm_mem} get chunk")
-                                req_status.out_data_info_list.append((tts_speech.copy(), finish_status, finalize))
+                                # req_status.out_data_info_list.append((tts_speech.copy(), finish_status, finalize))
+                                req_status.out_data_info_list.append((tts_speech, finish_status, finalize))
                                 req_status.event.set()
                     elif req.gen_finished:
                         tts_speech = req.get_gen_audios()

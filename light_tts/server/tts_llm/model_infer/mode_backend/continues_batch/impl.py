@@ -24,9 +24,10 @@ class ContinuesBatchBackend(ModeBackend):
         next_token_ids = sample(
             logits[mask], kwargs["output_token_ids"][mask], 
             kwargs["ignore_eos"][mask],
-            kwargs["bistream"][mask],
-            self.model.speech_token_size,
-            self.model.speech_token_size + 2
+            self.model.eos_token,
+            # kwargs["bistream"][mask],
+            # self.model.speech_token_size,
+            # self.model.speech_token_size + 2
         )
         next_token_ids = next_token_ids.detach().cpu().numpy()
 
@@ -41,9 +42,10 @@ class ContinuesBatchBackend(ModeBackend):
         next_token_ids = sample(
             logits[mask], kwargs["output_token_ids"][mask], 
             kwargs["ignore_eos"][mask],
-            kwargs["bistream"][mask],
-            self.model.speech_token_size,
-            self.model.speech_token_size + 2
+            self.model.eos_token,
+            # kwargs["bistream"][mask],
+            # self.model.speech_token_size,
+            # self.model.speech_token_size + 2
         )
         next_token_ids = next_token_ids.detach().cpu().numpy()
 
@@ -78,8 +80,8 @@ class ContinuesBatchBackend(ModeBackend):
             req_obj.shm_req.shm_cur_kv_len = req_obj.cur_kv_len
             req_obj.shm_req.shm_cur_output_len = req_obj.cur_output_len
 
-            req_obj.update_finish_status([self.eos_id], fill_token_id=self.fill_token_id)
-
+            # req_obj.update_finish_status([self.eos_id], fill_token_id=self.fill_token_id)
+            req_obj.update_finish_status(self.model.eos_token, self.model.stop_token_ids, fill_token_id=self.fill_token_id)
             if req_obj.finish_status.is_finished() or req_obj.shm_req.router_aborted:
                 finished_req_ids.append(req_obj.shm_req.request_id)
             elif req_obj.shm_req.req_status.get_status() == ReqRunStatus.WAIT_FOR_TEXT:

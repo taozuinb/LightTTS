@@ -238,6 +238,7 @@ class InferReq:
             self.finish_status = FinishStatus()
             self.semantic_len = self.shm_req.semantic_len
             self.bistream = self.shm_req.bistream
+            self.next_fill_index = self.shm_req.next_fill_index
         
         if self.paused or not self.initialized:
             self.shm_req.shm_cur_kv_len = self.cur_kv_len
@@ -269,11 +270,9 @@ class InferReq:
     def get_last_gen_token(self):
         return self.output_token_ids[-1]
 
-    def update_finish_status(self, eos_ids, fill_token_id=None):
-        if (
-            self.cur_output_len > 0
-            and self.get_last_gen_token() in eos_ids
-        ):
+    def update_finish_status(self, eos_id, stop_token_ids, fill_token_id=None):
+        if self.cur_output_len > 0 and ((not self.bistream and self.get_last_gen_token() in stop_token_ids) or (
+                self.bistream and self.get_last_gen_token() == eos_id)):
             self.finish_status.set_status(FinishStatus.FINISHED_STOP)
         elif self.cur_output_len >= self.sampling_param.shm_param.max_new_tokens:
             self.finish_status.set_status(FinishStatus.FINISHED_LENGTH)

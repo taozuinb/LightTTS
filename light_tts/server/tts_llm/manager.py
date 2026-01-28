@@ -172,6 +172,8 @@ class RouterManager:
         if req.bistream:
             req.audio_ids = (self.shared_speech_manager.get_index_speech_token(req.speech_index).arr[0] + self.vocab_size + 2).flatten().tolist()
             req.mix_ratio = self.mix_ratio
+            req.next_fill_index = (int(len(req.audio_ids) / self.mix_ratio[1]) + 1) * self.mix_ratio[1] - len(
+                req.audio_ids)
             self.req_queue.append_bistream(req)
         else:
             self.req_queue.append(req)

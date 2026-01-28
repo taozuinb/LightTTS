@@ -121,6 +121,7 @@ class Req(ctypes.Structure):
         ("finish_token_index", ctypes.c_int),
         ("out_tokens_queue", CircularQueue),
         ("sample_params", SamplingParams),
+        ("next_fill_index", ctypes.c_int),
         # can_released_mark的作用是：
         # 只有整个流程中的最后一个处理模块，一般是 detokenization 进程，标记这个参数为True后，主管理进程才能真
         # 的释放请求对像。
@@ -174,7 +175,7 @@ class Req(ctypes.Structure):
         else:
             self.sample_params = SamplingParams()
             self.sample_params.init(**sample_param)
-
+        self.next_fill_index = -1
         self.stream = request_dict.get("stream", False)
         self.text_len = len(prompt_ids)
         self.semantic_len = request_dict.get("semantic_len", 0)

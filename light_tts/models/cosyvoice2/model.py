@@ -21,6 +21,9 @@ class CosyVoice2TpPartModel(Qwen2TpPartModel):
     def __init__(self, kvargs):
         self.pt_dir = kvargs["pt_dir"]
         self.speech_token_size = kvargs["speech_token_size"]
+        self.eos_token = self.speech_token_size
+        self.fill_token = self.speech_token_size + 2
+        self.stop_token_ids = [self.speech_token_size + i for i in range(3)]
         super().__init__(kvargs)
         return
 
