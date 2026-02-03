@@ -24,3 +24,11 @@ voices:
   - name: male_llc
     audio_path: assets/male_llc.wav
     prompt_text: "住宿是当地准四星级酒店，都在景区周边，走路或者坐车都能到景点，不用跑很远，很方便的。"
+
+  - name: female002
+    audio_path: assets/female002.wav
+    prompt_text: "你好，我是奥克斯空调3022回访人员，请问一下您是刘先"
+
+  - name: male002
+    audio_path: assets/male002.wav
+    prompt_text: "嗯，然后这边您又说您开机了，然后开一段时间，它没有反应。"
