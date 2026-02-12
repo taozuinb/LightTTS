@@ -32,3 +32,9 @@ voices:
   - name: male002
     audio_path: assets/male002.wav
     prompt_text: "嗯，然后这边您又说您开机了，然后开一段时间，它没有反应。"
+  - name: yl_female001
+    audio_path: assets/id_female001.wav
+    prompt_text: "Halo. sudah termasuk SETIAP peserta mendapat asuransi kecelakaan perjalanan dengan pertanggungan lima ratus juta rupiah."
+  - name: yl_male001
+    audio_path: assets/id_male001.wav
+    prompt_text: "Halo. Saya ikut tur ke Guilin. Apakah sudah termasuk asuransi perjalanan."
