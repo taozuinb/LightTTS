@@ -7,9 +7,9 @@ voices:
     audio_path: assets/wangye1.wav
     prompt_text: "使用费的话，这一块是属于你管品牌就三万块钱。培训的话，培训费要两万，然后设计费要三千，然后系统使用费要两两千块钱这样子。那这一次的话就是今年我们加盟它，这些都是减免的。"
 
-#  - name: male
-#    audio_path: assets/xiangyu.mp3
-#    prompt_text: "咱们这个项目呢，属于是投入低、回本快。而且现在加盟呢，还有一些政策上的这个优惠。"
+  - name: male
+    audio_path: assets/xiangyu.mp3
+    prompt_text: "咱们这个项目呢，属于是投入低、回本快。而且现在加盟呢，还有一些政策上的这个优惠。"
 
   - name: male_long
     audio_path: assets/xiangyu.wav
@@ -32,9 +32,9 @@ voices:
   - name: male002
     audio_path: assets/male002.wav
     prompt_text: "嗯，然后这边您又说您开机了，然后开一段时间，它没有反应。"
-  - name: yl_female001
-    audio_path: assets/id_female001.wav
-    prompt_text: "Halo. sudah termasuk SETIAP peserta mendapat asuransi kecelakaan perjalanan dengan pertanggungan lima ratus juta rupiah."
-  - name: yl_male001
-    audio_path: assets/id_male001.wav
-    prompt_text: "Halo. Saya ikut tur ke Guilin. Apakah sudah termasuk asuransi perjalanan."
+#  - name: yl_female001
+#    audio_path: assets/id_female001.wav
+#    prompt_text: "Halo. sudah termasuk SETIAP peserta mendapat asuransi kecelakaan perjalanan dengan pertanggungan lima ratus juta rupiah."
+#  - name: yl_male001
+#    audio_path: assets/id_male001.wav
+#    prompt_text: "Halo. Saya ikut tur ke Guilin. Apakah sudah termasuk asuransi perjalanan."
