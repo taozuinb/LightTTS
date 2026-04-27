@@ -32,6 +32,10 @@ voices:
   - name: male002
     audio_path: assets/male002.wav
     prompt_text: "嗯，然后这边您又说您开机了，然后开一段时间，它没有反应。"
+
+  - name: v3female001
+    audio_path: assets/v3female001.wav
+    prompt_text: "壁挂炉的一个炉号，就是个序列号。"
 #  - name: yl_female001
 #    audio_path: assets/id_female001.wav
 #    prompt_text: "Halo. sudah termasuk SETIAP peserta mendapat asuransi kecelakaan perjalanan dengan pertanggungan lima ratus juta rupiah."
