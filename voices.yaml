@@ -36,6 +36,17 @@ voices:
   - name: v3female001
     audio_path: assets/v3female001.wav
     prompt_text: "壁挂炉的一个炉号，就是个序列号。"
+
+
+  - name: v4female001
+    audio_path: assets/v4female001_000527.wav
+    prompt_text: "这样的，那预计的这个修修改的这个审核时间是在15天内。"
+  - name: v4female002
+    audio_path: assets/v4female002_001246.wav
+    prompt_text: "嗯，好的。那我们这边也帮您再次催促一下我们的对应门店，然后也辛苦您保持一下电话畅通。"
+  - name: v4male001
+    audio_path: assets/v4male001_001083.wav
+    prompt_text: "嗯，好的，了解。那我们这边会把这个情况呢，直接反馈到餐厅的。"
 #  - name: yl_female001
 #    audio_path: assets/id_female001.wav
 #    prompt_text: "Halo. sudah termasuk SETIAP peserta mendapat asuransi kecelakaan perjalanan dengan pertanggungan lima ratus juta rupiah."
