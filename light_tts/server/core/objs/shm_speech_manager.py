@@ -72,7 +72,7 @@ class SharedTensorManager:
 
 
 class SharedSpeechManager:
-    def __init__(self, name, size, init_mark=True, preset_slots=10) -> None:
+    def __init__(self, name, size, init_mark=True, preset_slots=30) -> None:
         """
         初始化共享内存管理器
 
