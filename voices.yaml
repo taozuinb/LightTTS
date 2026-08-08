@@ -47,6 +47,20 @@ voices:
   - name: v4male001
     audio_path: assets/v4male001_001083.wav
     prompt_text: "嗯，好的，了解。那我们这边会把这个情况呢，直接反馈到餐厅的。"
+
+  - name: v4male002
+    audio_path: assets/v4male002_004364.wav
+    prompt_text: "我们这边看不到啊，早餐的话你可以到我们这边。"
+  - name: v4female003
+    audio_path: assets/v4female003_001421.wav
+    prompt_text: "嗯，不客气啊，张先生。我想问一下，您是否注册我们第二季度运行的一个积分活动？要帮您检查一下吗？"
+  - name: v4female004
+    audio_path: assets/v4female004_003100.wav
+    prompt_text: "噢，好的。就是如果说您确确认需要注销的话，您可以打开麦当劳 APP 或者微信支付宝小程序，点击一个右下角我的。"
+  - name: v4female005
+    audio_path: assets/v4female005_001773.wav
+    prompt_text: "好好好，感谢您选择奥克斯空调。有需要通过微信小程序奥克斯官方服务联系我们。祝您愉快，再见！"
+
 #  - name: yl_female001
 #    audio_path: assets/id_female001.wav
 #    prompt_text: "Halo. sudah termasuk SETIAP peserta mendapat asuransi kecelakaan perjalanan dengan pertanggungan lima ratus juta rupiah."
