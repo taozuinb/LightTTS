@@ -61,6 +61,28 @@ voices:
     audio_path: assets/v4female005_001773.wav
     prompt_text: "好好好，感谢您选择奥克斯空调。有需要通过微信小程序奥克斯官方服务联系我们。祝您愉快，再见！"
 
+  - name: v4female006
+    audio_path: assets/v4female006_003605.wav
+    prompt_text: "这边帮您登记一下信息哈，请问您是李先生吗？"
+  - name: v4male004
+    audio_path: assets/v4male004_005739.wav
+    prompt_text: "啊，这边没有关系的，这边师傅上门是会帮您核实的，您出示这个空调的一个机器条码，这边师傅那边是能查得到您的一些基本信息的。"
+  - name: v4female007
+    audio_path: assets/v4female007_002106.wav
+    prompt_text: "嗯您现在正在使用中未结清的借款，对吧？"
+  - name: v4female008
+    audio_path: assets/v4female008_001948.wav
+    prompt_text: "下午好，感谢您致电希尔顿全球预订客服中心。我是钱文，请问怎么称呼您？您好。"
+  - name: v4male005
+    audio_path: assets/v4male005_003254.wav
+    prompt_text: "对，是的。就不同地区，不同时间的酒店，他们都是会有不同。"
+  - name: v4female009
+    audio_path: assets/v4female009_005286.wav
+    prompt_text: "对嗯，对，他姓赵，赵子龙的赵。直接拨打这个150电话跟他联系就好了，先生。"
+  - name: v4female010
+    audio_path: assets/v4female010_004000.wav
+    prompt_text: "我大概了解了，方便提供一下您的全名，身份证后四位，电话号码，帮您查一下手机号码是多少，先生。借款当时绑定的号码哈。"
+
 #  - name: yl_female001
 #    audio_path: assets/id_female001.wav
 #    prompt_text: "Halo. sudah termasuk SETIAP peserta mendapat asuransi kecelakaan perjalanan dengan pertanggungan lima ratus juta rupiah."
