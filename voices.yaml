@@ -76,6 +76,9 @@ voices:
   - name: v4male005
     audio_path: assets/v4male005_003254.wav
     prompt_text: "对，是的。就不同地区，不同时间的酒店，他们都是会有不同。"
+  - name: v4male003
+    audio_path: assets/v4male003_002915.wav
+    prompt_text: "好的，先生。然后您意思是说，我这边看到你有一个维修的单子，是吗？"
   - name: v4female009
     audio_path: assets/v4female009_005286.wav
     prompt_text: "对嗯，对，他姓赵，赵子龙的赵。直接拨打这个150电话跟他联系就好了，先生。"
