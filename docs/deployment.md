@@ -63,10 +63,10 @@ CONFIG = {
 
 ```bash
 git submodule update --init --recursive
-bash build-image.sh light-tts:local
+bash build-image.sh
 ```
 
-构建会将虚拟环境原样复制到镜像的 `/usr/local/tts/.venv`。对于 uv 等工具安装到独立目录的 Python，脚本也会复制其基础解释器并保留路径。默认基础镜像为 Ubuntu 22.04、CUDA 12.1 和 cuDNN 8，系统 Python 为 3.10。如需匹配其他系统 Python 或 CUDA 环境，可用 `BASE_IMAGE` 指定兼容的 Ubuntu 基础镜像。
+构建会将虚拟环境原样复制到镜像的 `/usr/local/tts/.venv`。对于 uv 等工具安装到独立目录的 Python，脚本也会复制其基础解释器并保留路径。脚本默认使用 NVIDIA NGC 的 `nvcr.io/nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04` 基础镜像，并将构建产物加载到本地 Docker，标记为 `ccr.ccs.tencentyun.com/gz_asr/light-tts:local`。可用 `BASE_IMAGE` 覆盖基础镜像，或传入镜像名覆盖默认标签。
 
 将宿主机的模型目录挂载到容器中。目录内应包含 `CosyVoice2-0.5B-finetune-v1`，如果虚拟环境安装了 `ttsfrd`，还需要 `CosyVoice-ttsfrd/resource`。模型挂载保留写权限，供首次启动生成 TensorRT 引擎。
 
@@ -74,10 +74,19 @@ bash build-image.sh light-tts:local
 docker run -d --name light-tts --gpus all --shm-size 4g \
     -p 8080:8080 \
     -v /path/to/pretrained_models:/usr/local/tts/LightTTS/pretrained_models \
-    light-tts:local
+    ccr.ccs.tencentyun.com/gz_asr/light-tts:local
 ```
 
 可在镜像名后传入 `--model_dir` 和其他服务参数。容器就绪后可用 `curl -f http://localhost:8080/readiness` 检查。
+
+#### 在镜像内下载 Python 依赖
+
+```bash
+git submodule update --init --recursive
+bash build-image-download.sh
+```
+
+脚本用基础镜像内的系统 Python 3.10 创建 `/usr/local/tts/.venv`，从包源安装 LightTTS 依赖，默认使用 `ccr.ccs.tencentyun.com/gz_asr/light-tts:local` 标签。对比体积时可传入另一个标签，例如 `bash build-image-download.sh light-tts:download-test`。启动方式和模型挂载路径与上文相同。该构建使用 WeTextProcessing 做文本归一化。
 
 #### 构建镜像
 ```bash

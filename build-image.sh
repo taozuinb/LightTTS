@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+default_image_tag=ccr.ccs.tencentyun.com/gz_asr/light-tts:local
+default_base_image=nvcr.io/nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
+
 if [[ ${1:-} == --help || ${1:-} == -h ]]; then
     echo "Usage: $0 [IMAGE_TAG]"
-    echo "Build from /usr/local/tts/.venv on Linux x86_64. Set BASE_IMAGE to override the CUDA base."
+    echo "Build from /usr/local/tts/.venv on Linux x86_64."
+    echo "Default image tag: $default_image_tag"
+    echo "Set BASE_IMAGE to override the CUDA base ($default_base_image)."
     exit 0
 fi
 
@@ -19,7 +24,8 @@ fi
 
 project_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 venv_dir=/usr/local/tts/.venv
-image_tag=${1:-light-tts:local}
+image_tag=${1:-$default_image_tag}
+base_image=${BASE_IMAGE:-$default_base_image}
 
 if [[ ! -f $venv_dir/pyvenv.cfg || ! -x $venv_dir/bin/python ]]; then
     echo "A working Python virtual environment is required at $venv_dir." >&2
@@ -39,7 +45,8 @@ fi
 
 python_version=$("$venv_dir/bin/python" -c 'import sys; print("%d.%d" % sys.version_info[:2])')
 python_base_prefix=$("$venv_dir/bin/python" -c 'import sys; print(sys.base_prefix)')
-build_args=(--build-arg "PYTHON_VERSION=$python_version")
+build_args=(--build-arg "PYTHON_VERSION=$python_version"
+            --build-arg "BASE_IMAGE=$base_image")
 
 case $python_base_prefix in
     /usr|/usr/local)
@@ -60,10 +67,6 @@ case $python_base_prefix in
                      --build-arg "PYTHON_BASE_PREFIX=$python_base_prefix")
         ;;
 esac
-
-if [[ -n ${BASE_IMAGE:-} ]]; then
-    build_args+=(--build-arg "BASE_IMAGE=$BASE_IMAGE")
-fi
 
 docker buildx build --platform linux/amd64 --load \
     --file "$project_dir/Dockerfile.venv" \
