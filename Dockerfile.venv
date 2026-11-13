@@ -30,13 +30,23 @@ set -eu
 cd /tmp/lighttts-deps
 export PIP_DISABLE_PIP_VERSION_CHECK=1
 export PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
+export PIP_TIMEOUT=120
+export PIP_RETRIES=8
 venv_dir=/usr/local/tts/.venv
 python="$venv_dir/bin/python"
 
 /usr/bin/python3.10 -m venv "$venv_dir"
 "$python" -m pip install 'pip==24.3.1'
-"$python" -m pip install --index-url https://download.pytorch.org/whl/cu121 \
+# Fetch just the CUDA wheels from PyTorch. Resolve their dependencies via the mirror.
+echo 'Downloading PyTorch CUDA 12.1 wheels from download.pytorch.org'
+"$python" -m pip download --no-deps --only-binary=:all: --dest pytorch-wheels \
+    --index-url https://download.pytorch.org/whl/cu121 \
     'torch==2.3.1+cu121' 'torchaudio==2.3.1+cu121'
+sed -n '/^sympy==/p; /^mpmath==/p' requirements_lighttts.txt > pytorch-constraints.txt
+echo 'Installing PyTorch wheels and resolving dependencies from the PyPI mirror'
+"$python" -m pip install -c pytorch-constraints.txt \
+    pytorch-wheels/torch-*.whl pytorch-wheels/torchaudio-*.whl
+rm -rf pytorch-wheels
 
 # Whisper 20240930 imports pkg_resources in its isolated wheel build.
 printf '%s\n' 'setuptools==75.8.0' > build-constraints.txt
@@ -45,10 +55,12 @@ PIP_CONSTRAINT="$PWD/build-constraints.txt" "$python" -m pip install \
     'pynini==2.1.5' 'nvidia-ml-py==13.590.44'
 
 # ORT 1.18.0 needs the CUDA 12 build from Microsoft's feed.
+echo 'Downloading ONNX Runtime CUDA 12 wheel from the Microsoft feed'
 "$python" -m pip download --no-deps -c requirements_lighttts_constraints.txt \
     --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/ \
     onnxruntime-gpu
 "$python" -m pip install ./onnxruntime_gpu-*.whl
+echo 'Installing TensorRT with the NVIDIA package index'
 "$python" -m pip install -c requirements_lighttts_constraints.txt \
     --extra-index-url https://pypi.nvidia.com \
     tensorrt-cu12 tensorrt-cu12-bindings tensorrt-cu12-libs
