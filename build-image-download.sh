@@ -6,11 +6,10 @@ default_base_image=nvcr.io/nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
 
 if [[ ${1:-} == --help || ${1:-} == -h ]]; then
     echo "Usage: $0 [IMAGE_TAG]"
-    echo "Install LightTTS dependencies in the image using Python 3.10."
+    echo "Install LightTTS dependencies in the image using Python 3.10 and pip."
     echo "Default image tag: $default_image_tag"
     echo "Set BASE_IMAGE to override the CUDA base ($default_base_image)."
     echo "Set MODEL_DIR to include a local CosyVoice2 model directory in the image."
-    echo "Set UV_BIN to a local Linux x86_64 uv executable to skip pulling the uv image."
     exit 0
 fi
 
@@ -51,21 +50,12 @@ if [[ -n ${MODEL_DIR:-} ]]; then
         exit 1
     fi
 
-    build_args=(--target light-tts-with-model --build-context "tts_model=$model_dir")
-fi
-
-if [[ -n ${UV_BIN:-} ]]; then
-    if [[ ! -f $UV_BIN || ! -x $UV_BIN ]] ||
-        ! file -Lb -- "$UV_BIN" | grep -E '^ELF 64-bit.*x86-64' >/dev/null; then
-        echo "UV_BIN must point to an executable Linux x86_64 uv binary: $UV_BIN" >&2
+    model_link=$(find "$model_dir" -name '*.plan' -prune -o -type l -print -quit)
+    if [[ -n $model_link ]]; then
+        echo "Replace this model symlink with its target before building: $model_link" >&2
         exit 1
     fi
-
-    uv_context=$(mktemp -d)
-    trap 'rm -rf -- "$uv_context"' EXIT
-    cp -L -- "$UV_BIN" "$uv_context/uv"
-    chmod 755 "$uv_context/uv"
-    build_args+=(--build-context "uv_local=$uv_context" --build-arg UV_IMAGE=uv_local)
+    build_args=(--target light-tts-with-model --build-context "tts_model=$model_dir")
 fi
 
 docker buildx build --platform linux/amd64 --load \
