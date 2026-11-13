@@ -59,7 +59,7 @@ CONFIG = {
 
 #### 使用现有 Python 环境构建
 
-在已有 `/usr/local/tts/.venv` 的 Linux x86_64 服务器上执行。需要 Docker Buildx，运行容器的服务器还需要 NVIDIA Container Toolkit。
+在已有 Python 虚拟环境的 Linux x86_64 服务器上执行。默认读取 `/usr/local/tts/.venv`，可用 `VENV_DIR` 指定其他目录。需要 Docker Buildx，运行容器的服务器还需要 NVIDIA Container Toolkit。
 
 ```bash
 git submodule update --init --recursive
@@ -90,7 +90,7 @@ bash build-image-download.sh
 
 #### 构建内置模型的镜像
 
-在构建服务器上用 `MODEL_DIR` 指定实际模型目录。目录应包含完整权重、ONNX 文件和 `CosyVoice-BlankEN` tokenizer。
+两个构建脚本都支持用 `MODEL_DIR` 指定实际模型目录。目录应包含完整权重、ONNX 文件和 `CosyVoice-BlankEN` tokenizer。
 
 模型目录内使用实际文件和目录。脚本直接把该目录交给 Docker 构建，发现模型软链会提示对应路径。已有的 TensorRT `.plan` 文件会跳过。
 
@@ -99,7 +99,18 @@ sudo env MODEL_DIR=/usr/local/tts/pretrained_models/CosyVoice2-0.5B-finetune-v1 
     bash build-image-download.sh
 ```
 
-镜像启动时直接使用内置模型，部署时可省略模型目录挂载。TensorRT 引擎在目标 GPU 上首次启动时生成，需要容器对模型目录有写权限。将镜像推送到仓库后，在边缘服务中选择该镜像、分配 NVIDIA GPU 并配置容器端口 `8080`。
+使用项目目录下的离线虚拟环境构建时，可以同时打包模型和 ttsfrd 资源：
+
+```bash
+sudo env VENV_DIR="$PWD/.venv" \
+    MODEL_DIR=/usr/local/tts/pretrained_models/CosyVoice2-0.5B-finetune-v1 \
+    TTSFRD_RESOURCE_DIR=/usr/local/tts/pretrained_models/CosyVoice-ttsfrd/resource \
+    bash build-image.sh light-tts:offline
+```
+
+省略 `TTSFRD_RESOURCE_DIR` 时，`build-image.sh` 会在模型的同级目录查找 `CosyVoice-ttsfrd/resource`。只复制运行资源，跳过 `.whl` 安装包。
+
+镜像启动时直接使用内置模型和已打包的 ttsfrd 资源，部署时可省略模型目录挂载。TensorRT 引擎在目标 GPU 上首次启动时生成，需要容器对模型目录有写权限。将镜像推送到仓库后，在边缘服务中选择该镜像、分配 NVIDIA GPU 并配置容器端口 `8080`。
 
 #### 构建镜像
 ```bash

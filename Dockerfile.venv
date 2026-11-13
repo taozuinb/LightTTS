@@ -2,6 +2,7 @@
 ARG BASE_IMAGE=nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
 ARG PYTHON_BASE_STAGE=system-python
 ARG PYTHON_ENV_STAGE=copied-venv
+ARG TTSFRD_BASE_STAGE=light-tts
 FROM ${BASE_IMAGE} AS cuda-runtime
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -115,5 +116,8 @@ RUN set -eu; \
     model_dir=./pretrained_models/CosyVoice2-0.5B-finetune-v1; \
     model_link=$(find "$model_dir" -type l -print -quit); \
     if [ -n "$model_link" ]; then echo "Unresolved model symlink: $model_link" >&2; exit 1; fi
+
+FROM ${TTSFRD_BASE_STAGE} AS light-tts-with-ttsfrd
+COPY --from=ttsfrd_resources --exclude=*.whl / ./pretrained_models/CosyVoice-ttsfrd/resource/
 
 FROM light-tts AS default-image
