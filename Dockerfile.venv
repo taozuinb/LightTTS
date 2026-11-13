@@ -1,0 +1,56 @@
+# syntax=docker/dockerfile:1
+ARG BASE_IMAGE=nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
+ARG PYTHON_BASE_STAGE=system-python
+FROM ${BASE_IMAGE} AS cuda-runtime
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential ca-certificates ffmpeg libasound2 libsndfile1 libsox-dev sox \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM cuda-runtime AS system-python
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM cuda-runtime AS standalone-python
+ARG PYTHON_BASE_PREFIX=/opt/python
+COPY --from=python_install / ${PYTHON_BASE_PREFIX}/
+
+FROM ${PYTHON_BASE_STAGE} AS light-tts
+ARG PYTHON_VERSION
+COPY --from=tts_venv / /usr/local/tts/.venv/
+ENV VIRTUAL_ENV=/usr/local/tts/.venv
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /usr/local/tts/LightTTS
+COPY light_tts/ light_tts/
+COPY cosyvoice/ cosyvoice/
+COPY third_party/ third_party/
+COPY assets/ assets/
+COPY voices.yaml ./
+
+# CosyVoice looks for ttsfrd resources relative to its own source tree.
+RUN mkdir -p pretrained_models && ln -s ../pretrained_models cosyvoice/pretrained_models
+
+RUN "$VIRTUAL_ENV/bin/python" - <<'PY'
+import os
+import sys
+
+assert sys.prefix == os.environ["VIRTUAL_ENV"], sys.prefix
+assert "%d.%d" % sys.version_info[:2] == os.environ["PYTHON_VERSION"], sys.version
+
+import torch
+import torchaudio
+import onnxruntime
+import tensorrt
+import triton
+
+assert torch.version.cuda, "CUDA-enabled PyTorch is required"
+PY
+RUN "$VIRTUAL_ENV/bin/python" -m light_tts.server.api_server --help > /dev/null
+
+EXPOSE 8080
+ENTRYPOINT ["/usr/local/tts/.venv/bin/python", "-m", "light_tts.server.api_server", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["--model_dir", "./pretrained_models/CosyVoice2-0.5B-finetune-v1"]

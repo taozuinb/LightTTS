@@ -1,0 +1,14 @@
+**/.git
+**/.venv
+**/.env
+**/.envrc
+**/__pycache__
+**/.DS_Store
+**/pretrained_models
+/docs
+/test
+/.idea
+/.agents
+/.aws
+/.codex
+/logs
