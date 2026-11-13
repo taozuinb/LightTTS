@@ -92,3 +92,13 @@ RUN "$VIRTUAL_ENV/bin/python" -m light_tts.server.api_server --help > /dev/null
 EXPOSE 8080
 ENTRYPOINT ["/usr/local/tts/.venv/bin/python", "-m", "light_tts.server.api_server", "--host", "0.0.0.0", "--port", "8080"]
 CMD ["--model_dir", "./pretrained_models/CosyVoice2-0.5B-finetune-v1"]
+
+FROM light-tts AS light-tts-with-model
+# Build the TensorRT engine on the deployment GPU.
+COPY --from=tts_model --exclude=*.plan / ./pretrained_models/CosyVoice2-0.5B-finetune-v1/
+RUN set -eu; \
+    model_dir=./pretrained_models/CosyVoice2-0.5B-finetune-v1; \
+    broken_link=$(find "$model_dir" -xtype l -print -quit); \
+    if [ -n "$broken_link" ]; then echo "Broken model symlink: $broken_link" >&2; exit 1; fi
+
+FROM light-tts AS default-image

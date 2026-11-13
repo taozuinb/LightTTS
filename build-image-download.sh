@@ -9,6 +9,8 @@ if [[ ${1:-} == --help || ${1:-} == -h ]]; then
     echo "Install LightTTS dependencies in the image using Python 3.10."
     echo "Default image tag: $default_image_tag"
     echo "Set BASE_IMAGE to override the CUDA base ($default_base_image)."
+    echo "Set MODEL_DIR to include a local CosyVoice2 model directory in the image."
+    echo "Set UV_BIN to a local Linux x86_64 uv executable to skip pulling the uv image."
     exit 0
 fi
 
@@ -30,10 +32,47 @@ if [[ ! -f $project_dir/cosyvoice/cosyvoice/cli/frontend.py ||
     exit 1
 fi
 
+build_args=(--target light-tts)
+if [[ -n ${MODEL_DIR:-} ]]; then
+    if ! model_dir=$(cd -P -- "$MODEL_DIR" && pwd); then
+        echo "Cannot open model directory: $MODEL_DIR" >&2
+        exit 1
+    fi
+
+    for file in cosyvoice2.yaml llm.pt flow.pt hift.pt campplus.onnx \
+        speech_tokenizer_v2.onnx flow.decoder.estimator.fp32.onnx; do
+        if [[ ! -f $model_dir/$file || ! -s $model_dir/$file ]]; then
+            echo "Missing or empty model file: $model_dir/$file" >&2
+            exit 1
+        fi
+    done
+    if [[ ! -d $model_dir/CosyVoice-BlankEN ]]; then
+        echo "Missing tokenizer directory: $model_dir/CosyVoice-BlankEN" >&2
+        exit 1
+    fi
+
+    build_args=(--target light-tts-with-model --build-context "tts_model=$model_dir")
+fi
+
+if [[ -n ${UV_BIN:-} ]]; then
+    if [[ ! -f $UV_BIN || ! -x $UV_BIN ]] ||
+        ! file -Lb -- "$UV_BIN" | grep -E '^ELF 64-bit.*x86-64' >/dev/null; then
+        echo "UV_BIN must point to an executable Linux x86_64 uv binary: $UV_BIN" >&2
+        exit 1
+    fi
+
+    uv_context=$(mktemp -d)
+    trap 'rm -rf -- "$uv_context"' EXIT
+    cp -L -- "$UV_BIN" "$uv_context/uv"
+    chmod 755 "$uv_context/uv"
+    build_args+=(--build-context "uv_local=$uv_context" --build-arg UV_IMAGE=uv_local)
+fi
+
 docker buildx build --platform linux/amd64 --load \
     --file "$project_dir/Dockerfile.venv" \
     --build-arg "BASE_IMAGE=${BASE_IMAGE:-$default_base_image}" \
     --build-arg PYTHON_ENV_STAGE=downloaded-venv \
     --build-arg PYTHON_VERSION=3.10 \
     --tag "${1:-$default_image_tag}" \
+    "${build_args[@]}" \
     "$project_dir"

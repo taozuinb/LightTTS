@@ -88,6 +88,19 @@ bash build-image-download.sh
 
 脚本用基础镜像内的系统 Python 3.10 创建 `/usr/local/tts/.venv`，从包源安装 LightTTS 依赖，默认使用 `ccr.ccs.tencentyun.com/gz_asr/light-tts:local` 标签。对比体积时可传入另一个标签，例如 `bash build-image-download.sh light-tts:download-test`。启动方式和模型挂载路径与上文相同。该构建使用 WeTextProcessing 做文本归一化。
 
+#### 构建内置模型的镜像
+
+在构建服务器上用 `MODEL_DIR` 指定实际模型目录。目录应包含完整权重、ONNX 文件和 `CosyVoice-BlankEN` tokenizer。
+
+```bash
+sudo env MODEL_DIR=/usr/local/tts/pretrained_models/CosyVoice2-0.5B-finetune-v1 \
+    bash build-image-download.sh
+```
+
+如果构建机拉取 `ghcr.io` 较慢，且已经安装了 Linux x86_64 版 uv，可以在同一条命令中同时传入 `UV_BIN="$(command -v uv)"`。脚本会直接使用该可执行文件，Python 依赖仍在镜像内下载。
+
+镜像启动时直接使用内置模型，部署时可省略模型目录挂载。TensorRT 引擎在目标 GPU 上首次启动时生成，需要容器对模型目录有写权限。将镜像推送到仓库后，在边缘服务中选择该镜像、分配 NVIDIA GPU 并配置容器端口 `8080`。
+
 #### 构建镜像
 ```bash
 docker build -t light-tts:v1.0 .
